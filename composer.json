@@ -11,6 +11,12 @@
   "homepage": "https://github.com/dev-reymark/laravel-source-encryptor",
   "type": "library",
   "license": "MIT",
+  "authors": [
+    {
+      "name": "Rey Mark Tapar",
+      "role": "Developer"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "DevReymark\\SourceEncryptor\\": "src/"
