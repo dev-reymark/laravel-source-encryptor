@@ -1,0 +1,31 @@
+{
+  "name": "dev-reymark/laravel-source-encryptor",
+  "description": "Encrypt Laravel source code for secure Laravel distribution",
+  "keywords": [
+    "laravel",
+    "encryption",
+    "source-protection",
+    "code-protection",
+    "laravel-package"
+  ],
+  "homepage": "https://github.com/dev-reymark/laravel-source-encryptor",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "DevReymark\\SourceEncryptor\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "DevReymark\\SourceEncryptor\\SourceEncryptorServiceProvider"
+      ]
+    }
+  },
+  "require": {
+    "php": "^8.2",
+    "illuminate/support": "^11.0|^12.0"
+  },
+  "minimum-stability": "stable"
+}
