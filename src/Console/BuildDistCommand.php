@@ -5,46 +5,164 @@ namespace DevReymark\SourceEncryptor\Console;
 use Illuminate\Console\Command;
 use DevReymark\SourceEncryptor\Services\EncryptService;
 use Illuminate\Support\Facades\File;
+use Symfony\Component\Process\Process;
 
 class BuildDistCommand extends Command
 {
-    protected $signature = 'source:build';
+    protected $signature = 'source:build
+        {--no-frontend : Skip frontend build}
+        {--skip-composer : Skip composer install step}';
 
     protected $description = 'Build production distribution with encrypted source';
 
     public function handle()
     {
+        $start = microtime(true);
+
         $root = base_path();
         $dist = $root . '/dist';
 
-        $this->info("Preparing dist directory...");
+        $this->info('Starting production build...');
 
-        if (File::exists($dist)) {
-            File::deleteDirectory($dist);
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Encryption Key
+        |--------------------------------------------------------------------------
+        */
+
+        if (!config('source-encryptor.key')) {
+            $this->error('SOURCE_ENCRYPTION_KEY is not configured.');
+            return self::FAILURE;
         }
 
-        File::makeDirectory($dist);
+        /*
+        |--------------------------------------------------------------------------
+        | Install Composer Dependencies
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$this->option('skip-composer')) {
+
+            $this->components->task('Installing production Composer dependencies', function () use ($root) {
+
+                $process = new Process([
+                    'composer',
+                    'install',
+                    '--no-dev',
+                    '--optimize-autoloader',
+                    '--no-scripts',
+                    '--no-interaction',
+                    '--prefer-dist'
+                ]);
+
+                $process->setWorkingDirectory($root);
+                $process->setTimeout(null);
+
+                $process->run(function ($type, $buffer) {
+                    $this->output->write($buffer);
+                });
+
+                return $process->isSuccessful();
+            });
+        }
 
         /*
-        |-------------------------------------------
+        |--------------------------------------------------------------------------
+        | Frontend Build Detection
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$this->option('no-frontend')) {
+
+            $packageJson = base_path('package.json');
+
+            if (File::exists($packageJson)) {
+
+                $package = json_decode(File::get($packageJson), true);
+
+                if (isset($package['scripts']['build'])) {
+
+                    if (!File::exists(base_path('node_modules'))) {
+
+                        $this->components->task('Installing npm dependencies', function () use ($root) {
+
+                            $process = new Process(['npm', 'install']);
+
+                            $process->setWorkingDirectory($root);
+                            $process->setTimeout(null);
+
+                            $process->run(function ($type, $buffer) {
+                                $this->output->write($buffer);
+                            });
+
+                            return $process->isSuccessful();
+                        });
+                    }
+
+                    $this->components->task('Building frontend assets', function () use ($root) {
+
+                        $process = new Process(['npm', 'run', 'build']);
+
+                        $process->setWorkingDirectory($root);
+                        $process->setTimeout(null);
+
+                        $process->run(function ($type, $buffer) {
+                            $this->output->write($buffer);
+                        });
+
+                        return $process->isSuccessful();
+                    });
+
+                } else {
+
+                    $this->line('<fg=yellow>⚠ No frontend build script detected. Skipping.</>');
+                }
+
+            } else {
+
+                $this->line('<fg=yellow>⚠ No package.json found. Skipping frontend build.</>');
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prepare Dist Directory
+        |--------------------------------------------------------------------------
+        */
+
+        $this->components->task('Preparing dist directory', function () use ($dist) {
+
+            if (File::exists($dist)) {
+                File::deleteDirectory($dist);
+            }
+
+            File::makeDirectory($dist, 0755, true);
+
+            return true;
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | Encrypt Source
-        |-------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
-        $this->info("Encrypting source...");
+        $this->components->task('Encrypting source files', function () {
 
-        $encrypt = new EncryptService();
+            $encrypt = new EncryptService();
+            $encrypt->cleanOutput();
+            $encrypt->encryptProject();
 
-        $encrypt->cleanOutput();
-        $encrypt->encryptProject();
+            return true;
+        });
 
         /*
-        |-------------------------------------------
-        | Copy Runtime Files
-        |-------------------------------------------
+        |--------------------------------------------------------------------------
+        | Copy Project Files
+        |--------------------------------------------------------------------------
         */
 
-        $this->info("Copying project files...");
+        $this->info('Copying project files...');
 
         $dirs = [
             'bootstrap',
@@ -58,7 +176,7 @@ class BuildDistCommand extends Command
 
         foreach ($dirs as $dir) {
 
-            $source = $root . '/' . $dir;
+            $source = base_path($dir);
             $target = $dist . '/' . $dir;
 
             if (File::exists($source)) {
@@ -66,25 +184,28 @@ class BuildDistCommand extends Command
             }
         }
 
-        // artisan
-        File::copy($root . '/artisan', $dist . '/artisan');
+        /*
+        |--------------------------------------------------------------------------
+        | Copy Essential Files
+        |--------------------------------------------------------------------------
+        */
 
-        // .env
-        if (File::exists($root . '/.env')) {
-            File::copy($root . '/.env', $dist . '/.env');
+        File::copy(base_path('artisan'), $dist . '/artisan');
+
+        if (File::exists(base_path('.env'))) {
+            File::copy(base_path('.env'), $dist . '/.env');
         }
 
-        // composer files
-        File::copy($root . '/composer.json', $dist . '/composer.json');
-        File::copy($root . '/composer.lock', $dist . '/composer.lock');
+        File::copy(base_path('composer.json'), $dist . '/composer.json');
+        File::copy(base_path('composer.lock'), $dist . '/composer.lock');
 
         /*
-|-------------------------------------------
-| Create Route Loader Stubs
-|-------------------------------------------
-*/
+        |--------------------------------------------------------------------------
+        | Create Route Loader Stubs
+        |--------------------------------------------------------------------------
+        */
 
-        $this->info("Creating encrypted route loaders...");
+        $this->info('Creating encrypted route loaders...');
 
         $routesPath = $dist . '/routes';
 
@@ -108,28 +229,49 @@ PHP;
         }
 
         /*
-        |-------------------------------------------
+        |--------------------------------------------------------------------------
         | Remove Raw Source
-        |-------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
-        $this->info("Removing raw source...");
-
+        $this->info('Removing raw source...');
         File::deleteDirectory($dist . '/app');
 
         /*
-        |-------------------------------------------
-        | Patch Composer Autoload
-        |-------------------------------------------
+        |--------------------------------------------------------------------------
+        | Remove Frontend Source
+        |--------------------------------------------------------------------------
         */
 
-        $this->info("Patching composer.json...");
+        $frontendDirs = [
+            $dist . '/resources/js',
+            $dist . '/resources/css',
+            $dist . '/resources/vue',
+            $dist . '/resources/react',
+            $dist . '/resources/sass',
+            $dist . '/resources/ts',
+        ];
+
+        foreach ($frontendDirs as $dir) {
+            if (File::exists($dir)) {
+                File::deleteDirectory($dir);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Patch Composer
+        |--------------------------------------------------------------------------
+        */
+
+        $this->info('Patching composer.json...');
 
         $composerPath = $dist . '/composer.json';
 
         $composer = json_decode(File::get($composerPath), true);
 
         unset($composer['require-dev']);
+        unset($composer['autoload-dev']);
 
         File::put(
             $composerPath,
@@ -137,56 +279,67 @@ PHP;
         );
 
         /*
-        |-------------------------------------------
-        | Remove Dev Service Providers
-        |-------------------------------------------
+        |--------------------------------------------------------------------------
+        | Optimize Composer
+        |--------------------------------------------------------------------------
         */
 
-        $this->info("Cleaning dev service providers...");
+        $this->components->task('Optimizing Composer autoload', function () use ($dist) {
 
-        $configPath = $dist . '/config/app.php';
+            $process = new Process([
+                'composer',
+                'dump-autoload',
+                '--optimize',
+                '--no-dev',
+                '--no-scripts'
+            ]);
 
-        if (File::exists($configPath)) {
+            $process->setWorkingDirectory($dist);
+            $process->setTimeout(null);
+            $process->run();
 
-            $config = File::get($configPath);
-
-            $providersToRemove = [
-                'Laravel\\Pail\\PailServiceProvider',
-            ];
-
-            foreach ($providersToRemove as $provider) {
-
-                $config = str_replace(
-                    $provider . '::class,',
-                    '',
-                    $config
-                );
-
-                $config = str_replace(
-                    $provider . '::class',
-                    '',
-                    $config
-                );
-            }
-
-            File::put($configPath, $config);
-        }
+            return $process->isSuccessful();
+        });
 
         /*
-        |-------------------------------------------
-        | Optimize Composer
-        |-------------------------------------------
+        |--------------------------------------------------------------------------
+        | Package Discovery
+        |--------------------------------------------------------------------------
         */
 
-        $this->info("Optimizing Composer autoload...");
+        $this->components->task('Running package discovery', function () use ($dist) {
 
-        chdir($dist);
+            $process = new Process(['php', 'artisan', 'package:discover']);
 
-        exec('composer dump-autoload --optimize --no-dev --no-scripts');
+            $process->setWorkingDirectory($dist);
+            $process->setTimeout(null);
+            $process->run();
 
-        chdir($root);
+            return $process->isSuccessful();
+        });
 
-        $this->info("Distribution built successfully.");
-        $this->line("Location: {$dist}");
+        /*
+        |--------------------------------------------------------------------------
+        | Build Summary
+        |--------------------------------------------------------------------------
+        */
+
+        $time = round(microtime(true) - $start, 2);
+
+        $this->newLine();
+        $this->info('Distribution built successfully.');
+
+        $this->table(
+            ['Item', 'Location'],
+            [
+                ['Distribution Folder', $dist],
+                ['Encrypted Source', 'bootstrap/cache/source.enc'],
+                ['Public Entry', 'public/index.php'],
+            ]
+        );
+
+        $this->line("Build completed in {$time}s");
+
+        return self::SUCCESS;
     }
 }

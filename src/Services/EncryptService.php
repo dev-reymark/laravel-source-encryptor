@@ -20,11 +20,9 @@ class EncryptService
 
         $this->exclude = config('source-encryptor.exclude', []);
 
-        $this->output = config('source-encryptor.output') ?? storage_path('encrypted-source');
-
-        if (!is_dir($this->output)) {
-            mkdir($this->output, 0755, true);
-        }
+        $this->output = base_path(
+            config('source-encryptor.output', 'bootstrap/cache')
+        );
     }
 
     protected function isExcluded(string $path): bool
@@ -66,13 +64,16 @@ class EncryptService
 
     public function cleanOutput(): void
     {
+        if (!is_dir($this->output)) {
+            return;
+        }
+
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($this->output, \FilesystemIterator::SKIP_DOTS),
             \RecursiveIteratorIterator::CHILD_FIRST
         );
 
         foreach ($iterator as $file) {
-
             if ($file->isDir()) {
                 rmdir($file->getRealPath());
             } else {
@@ -168,7 +169,11 @@ class EncryptService
             }
         }
 
-        $output = app()->bootstrapPath('cache/source.enc');
+        $output = $this->output . '/source.enc';
+
+        if (!is_dir($this->output)) {
+            mkdir($this->output, 0755, true);
+        }
 
         file_put_contents(
             $output,

@@ -38,6 +38,6 @@ return [
     |
     */
 
-    'output' => storage_path('encrypted-source'),
+    'output' => 'bootstrap/cache',
 
 ];

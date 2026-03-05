@@ -3,7 +3,6 @@
 namespace DevReymark\SourceEncryptor;
 
 use Illuminate\Support\ServiceProvider;
-use DevReymark\SourceEncryptor\Console\EncryptCommand;
 use DevReymark\SourceEncryptor\Console\BuildDistCommand;
 use DevReymark\SourceEncryptor\Loader\EncryptedAutoloader;
 
@@ -26,9 +25,7 @@ class SourceEncryptorServiceProvider extends ServiceProvider
         EncryptedAutoloader::register();
 
         if ($this->app->runningInConsole()) {
-
             $this->commands([
-                EncryptCommand::class,
                 BuildDistCommand::class
             ]);
         }
