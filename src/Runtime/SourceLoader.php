@@ -10,7 +10,13 @@ class SourceLoader
 
     public function __construct()
     {
-        $this->key = hex2bin(config('source-encryptor.key'));
+        $key = $GLOBALS['__SOURCE_ENCRYPTION_KEY__'] ?? null;
+
+        if (!$key) {
+            throw new \RuntimeException('Encryption key not available.');
+        }
+
+        $this->key = hex2bin($key);
 
         $path = base_path('bootstrap/cache/source.enc');
 

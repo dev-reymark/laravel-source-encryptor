@@ -26,7 +26,7 @@ class SourceEncryptorServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
-                BuildDistCommand::class
+                BuildDistCommand::class,
             ]);
         }
     }

@@ -26,7 +26,9 @@ return [
     'exclude' => [
         'app/Console',
         'app/Exceptions',
-        'app/Providers',
+        'app/Providers', // keep this
+        'bootstrap',
+        'storage',
     ],
 
     /*

@@ -158,6 +158,63 @@ class BuildDistCommand extends Command
 
         /*
         |--------------------------------------------------------------------------
+        | Cache Config
+        |--------------------------------------------------------------------------
+        */
+
+        $this->components->task('Caching config', function () use ($root) {
+
+            $process = new Process(['php', 'artisan', 'config:cache']);
+
+            $process->setWorkingDirectory($root);
+            $process->setTimeout(null);
+            $process->run();
+
+            return $process->isSuccessful();
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Encrypt Config Cache
+        |--------------------------------------------------------------------------
+        */
+
+        $this->components->task('Encrypting config cache', function () {
+
+            $key = hex2bin(config('source-encryptor.key'));
+
+            $config = base_path('bootstrap/cache/config.php');
+
+            $data = file_get_contents($config);
+
+            $iv = random_bytes(16);
+
+            $encrypted = openssl_encrypt(
+                $data,
+                'AES-256-CBC',
+                $key,
+                OPENSSL_RAW_DATA,
+                $iv
+            );
+
+            $cache = base_path('bootstrap/cache');
+
+            if (!is_dir($cache)) {
+                mkdir($cache, 0755, true);
+            }
+
+            file_put_contents(
+                $cache . '/config.enc',
+                base64_encode($iv . $encrypted)
+            );
+
+            unlink($config);
+
+            return true;
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | Copy Project Files
         |--------------------------------------------------------------------------
         */
@@ -165,8 +222,8 @@ class BuildDistCommand extends Command
         $this->info('Copying project files...');
 
         $dirs = [
+            'app',
             'bootstrap',
-            'config',
             'database',
             'public',
             'resources',
@@ -186,15 +243,70 @@ class BuildDistCommand extends Command
 
         /*
         |--------------------------------------------------------------------------
+        | Remove config directory
+        |--------------------------------------------------------------------------
+        */
+
+        File::deleteDirectory($dist . '/config');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Patch bootstrap/app.php for encrypted config
+        |--------------------------------------------------------------------------
+        */
+
+        $buildKey = config('source-encryptor.key');
+
+        $patch = <<<PHP
+use DevReymark\\SourceEncryptor\\Runtime\\ConfigLoader;
+
+\$GLOBALS['__SOURCE_ENCRYPTION_KEY__'] = '{$buildKey}';
+
+if (file_exists(__DIR__.'/cache/config.enc')) {
+    ConfigLoader::load(__DIR__.'/cache/config.enc', '{$buildKey}');
+}
+
+PHP;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Patch bootstrap/app.php for encrypted config
+        |--------------------------------------------------------------------------
+        */
+
+        $this->components->task('Patching bootstrap/app.php for encrypted config', function () use ($dist, $patch) {
+
+            $appPath = $dist . '/bootstrap/app.php';
+
+            if (!file_exists($appPath)) {
+                throw new \RuntimeException('bootstrap/app.php not found in dist.');
+            }
+
+            $content = file_get_contents($appPath);
+
+            if (str_contains($content, 'ConfigLoader::load')) {
+                return true; // already patched
+            }
+
+            $content = preg_replace(
+                '/^\<\?php\s*/',
+                "<?php\n\n{$patch}\n",
+                $content,
+                1
+            );
+
+            file_put_contents($appPath, $content);
+
+            return true;
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | Copy Essential Files
         |--------------------------------------------------------------------------
         */
 
         File::copy(base_path('artisan'), $dist . '/artisan');
-
-        if (File::exists(base_path('.env'))) {
-            File::copy(base_path('.env'), $dist . '/.env');
-        }
 
         File::copy(base_path('composer.json'), $dist . '/composer.json');
         File::copy(base_path('composer.lock'), $dist . '/composer.lock');
@@ -235,7 +347,27 @@ PHP;
         */
 
         $this->info('Removing raw source...');
-        File::deleteDirectory($dist . '/app');
+
+        $keep = [
+            'Providers',
+            'Console',
+            'Exceptions',
+        ];
+
+        $appPath = $dist . '/app';
+
+        if (is_dir($appPath)) {
+            foreach (scandir($appPath) as $dir) {
+
+                if ($dir === '.' || $dir === '..') {
+                    continue;
+                }
+
+                if (!in_array($dir, $keep)) {
+                    File::deleteDirectory($appPath . '/' . $dir);
+                }
+            }
+        }
 
         /*
         |--------------------------------------------------------------------------
