@@ -79,14 +79,12 @@ class BuildDistCommand extends Command
         File::copy($root . '/composer.lock', $dist . '/composer.lock');
 
         /*
-        |-------------------------------------------
-        | Create Route Loader Stubs
-        |-------------------------------------------
-        */
+|-------------------------------------------
+| Create Route Loader Stubs
+|-------------------------------------------
+*/
 
         $this->info("Creating encrypted route loaders...");
-
-        $routes = ['web', 'api', 'console', 'channels'];
 
         $routesPath = $dist . '/routes';
 
@@ -94,17 +92,19 @@ class BuildDistCommand extends Command
             File::makeDirectory($routesPath);
         }
 
-        foreach ($routes as $route) {
+        foreach (File::files(base_path('routes')) as $file) {
+
+            $name = $file->getFilenameWithoutExtension();
 
             $stub = <<<PHP
 <?php
 
 app(\\DevReymark\\SourceEncryptor\\Runtime\\SourceLoader::class)
-    ->load('routes/{$route}.php');
+    ->load('routes/{$name}.php');
 
 PHP;
 
-            File::put($routesPath . "/{$route}.php", $stub);
+            File::put($routesPath . "/{$name}.php", $stub);
         }
 
         /*

@@ -15,25 +15,39 @@ class SourceLoader
         $path = base_path('bootstrap/cache/source.enc');
 
         if (!file_exists($path)) {
+            $this->files = [];
             return;
         }
 
-        $this->files = json_decode(
-            file_get_contents($path),
-            true
-        );
+        $this->files = json_decode(file_get_contents($path), true) ?? [];
     }
-    
+
     public function load(string $relative)
     {
+        if (empty($this->files)) {
+            require base_path($relative);
+            return;
+        }
+
         if (isset($this->loaded[$relative])) {
             return;
         }
 
         if (!isset($this->files[$relative])) {
-            return;
+            throw new \RuntimeException("Encrypted file not found: " . $relative);
         }
 
+        $code = $this->decrypt($relative);
+
+        $code = $this->rewriteIncludes($code, dirname($relative));
+
+        $this->loaded[$relative] = true;
+
+        eval ("?>" . $code);
+    }
+
+    protected function decrypt(string $relative): string
+    {
         $data = base64_decode($this->files[$relative]);
 
         $iv = substr($data, 0, 16);
@@ -47,10 +61,25 @@ class SourceLoader
             $iv
         );
 
-        $code = gzuncompress($decrypted);
+        return gzuncompress($decrypted);
+    }
 
-        eval ("?>" . $code);
+    protected function rewriteIncludes(string $code, string $base): string
+    {
+        return preg_replace_callback(
+            '/(require|require_once|include|include_once)\s*\(?\s*(?:__DIR__\s*\.\s*)?[\'"](.+?\.php)[\'"]\s*\)?\s*;/',
+            function ($matches) use ($base) {
 
-        $this->loaded[$relative] = true;
+                $file = $matches[2];
+
+                $path = $base . '/' . $file;
+
+                $path = str_replace(['\\', '//'], '/', $path);
+                $path = preg_replace('#/\.#', '', $path);
+
+                return 'app(\\DevReymark\\SourceEncryptor\\Runtime\\SourceLoader::class)->load("' . $path . '");';
+            },
+            $code
+        );
     }
 }

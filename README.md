@@ -32,13 +32,6 @@ php -r "echo bin2hex(random_bytes(32));"
 ```
 
 ## Usage
-
-### Encrypt Source Code
-```bash
-php artisan source:encrypt
-```
-This encrypts the `app/` and `routes/` directories to `storage/encrypted-source/`.
-
 ### Build Production Distribution
 First, install without dev dependencies:
 ```bash
