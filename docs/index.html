@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laravel Source Encryptor — Protect Your PHP Code</title>
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;circle cx='50' cy='50' r='50' fill='%230f172a'/&gt;&lt;text x='50' y='63' font-family='sans-serif' font-weight='bold' font-size='48' fill='%23ffffff' text-anchor='middle'&gt;L&lt;/text&gt;&lt;/svg&gt;">
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Encrypt Laravel source code and safely distribute applications without exposing PHP source files.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.6s ease-out forwards',
+            'float': 'float 4s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(12px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  
+  <!-- Styling overrides -->
+  <style>
+    body {
+      background-color: #f7f7f5;
+    }
+    .code-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+    .code-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .code-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    
+    .glass-panel {
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      background-color: rgba(255, 255, 255, 0.75);
+      box-shadow: 0 20px 80px rgba(148, 163, 184, 0.18);
+      backdrop-filter: blur(24px);
+    }
+    
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      border: 1px solid rgba(186, 230, 253, 0.7);
+      background-color: #f0f9ff;
+      padding: 0.25rem 0.75rem;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      color: #0284c7;
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-900 selection:bg-sky-200/60 overflow-x-hidden">
+
+  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute left-1/2 top-0 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,_rgba(59,130,246,0.14),_transparent_62%)] blur-3xl"></div>
+    <div class="absolute left-[-10%] top-[24rem] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,_rgba(244,114,182,0.12),_transparent_62%)] blur-3xl"></div>
+    <div class="absolute right-[-8%] top-[62rem] h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(circle,_rgba(251,191,36,0.12),_transparent_64%)] blur-3xl"></div>
+  </div>
+
+  <nav class="absolute inset-x-0 top-0 z-50 mx-auto flex h-16 max-w-5xl items-center justify-between px-6 backdrop-blur-xl border-b border-slate-200/30">
+    <div class="flex items-center gap-2 font-bold tracking-tight text-slate-950">
+      <span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-950 text-[10px] font-mono text-white">L</span>
+      laravel-source-encryptor<span class="h-2 w-2 rounded-full bg-sky-500"></span>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="hidden items-center gap-6 text-xs font-semibold text-slate-500 md:flex">
+        <a href="#features" class="hover:text-slate-950 transition">Features</a>
+        <a href="#installation" class="hover:text-slate-950 transition">Installation</a>
+        <a href="#usage" class="hover:text-slate-950 transition">Usage</a>
+        <a href="#how-it-works" class="hover:text-slate-950 transition">How it Works</a>
+      </div>
+      <a href="https://github.com/dev-reymark/laravel-source-encryptor" target="_blank" class="inline-flex h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-sm hover:bg-slate-50 active:scale-[0.98] transition" title="GitHub Repository">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+        </svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </nav>
+
+  <section class="relative overflow-hidden px-6 pb-16 pt-40 text-center z-10 mx-auto max-w-7xl">
+    <div class="relative mx-auto max-w-3xl animate-fade-in">
+      <div class="section-badge mb-6">Laravel 11 & 12 Supported</div>
+      
+      <h1 class="mt-6 max-w-3xl text-5xl font-semibold tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-7xl mx-auto leading-tight text-balance">
+        Safely distribute
+        <span class="block text-slate-400">your Laravel applications.</span>
+      </h1>
+      
+      <p class="mx-auto mt-6 max-w-xl text-pretty text-base leading-7 text-slate-500 sm:text-lg">
+        Encrypt your Laravel source code and protect your intellectual property. Converts your PHP files into encrypted code that is decrypted only at runtime. No external extensions required.
+      </p>
+
+      <div class="mt-8 flex justify-center gap-3">
+        <a href="#installation" class="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-slate-950 px-6 text-sm font-medium text-white shadow-xl shadow-slate-950/10 transition hover:bg-slate-800">
+          Get Started
+        </a>
+        <a href="#usage" class="inline-flex h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-6 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950">
+          <i data-lucide="terminal" class="mr-2 h-4 w-4"></i>
+          View Commands
+        </a>
+      </div>
+    </div>
+    
+    <div class="relative mx-auto mt-16 max-w-4xl">
+       <div class="absolute inset-x-10 top-12 hidden h-[26rem] rounded-[44px] border border-white/60 bg-white/45 shadow-[0_30px_120px_rgba(148,163,184,0.16)] backdrop-blur-2xl lg:block"></div>
+       <div class="glass-panel relative overflow-hidden p-1 text-left max-w-3xl mx-auto z-10 shadow-[0_24px_80px_rgba(15,23,42,0.1)]">
+         <div class="flex h-10 items-center gap-2 border-b border-white/40 bg-white/50 px-4">
+           <span class="h-3 w-3 rounded-full bg-rose-400"></span>
+           <span class="h-3 w-3 rounded-full bg-amber-400"></span>
+           <span class="h-3 w-3 rounded-full bg-emerald-400"></span>
+           <span class="ml-2 text-xs font-mono text-slate-400">terminal</span>
+         </div>
+         <div class="p-6 bg-slate-950/5 font-mono text-sm overflow-x-auto code-scroll rounded-b-[30px]">
+           <div class="text-emerald-600 mb-2"># 1. Require the package</div>
+           <div class="text-slate-800 mb-4">composer require dev-reymark/laravel-source-encryptor</div>
+           
+           <div class="text-emerald-600 mb-2"># 2. Publish config</div>
+           <div class="text-slate-800 mb-4">php artisan vendor:publish --tag=source-encryptor-config</div>
+           
+           <div class="text-emerald-600 mb-2"># 3. Build encrypted distribution</div>
+           <div class="text-slate-800 flex items-center">
+             <span>php artisan source:build</span>
+             <span class="ml-2 inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Success</span>
+           </div>
+         </div>
+       </div>
+    </div>
+  </section>
+
+  <section id="features" class="mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-3xl text-center">
+      <span class="section-badge mb-5">Core Features</span>
+      <h2 class="mt-2 text-4xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-5xl">
+        Everything you need to
+        <span class="block text-slate-400">protect your source code.</span>
+      </h2>
+    </div>
+
+    <div class="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <div class="glass-panel relative overflow-hidden p-6 lg:col-span-2">
+        <div class="absolute inset-0 bg-gradient-to-br from-fuchsia-200/60 via-white to-sky-100/70"></div>
+        <div class="relative">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/70 bg-white/85 shadow-sm">
+            <i data-lucide="shield-check" class="h-5 w-5 text-slate-700"></i>
+          </div>
+          <h3 class="mt-5 text-xl font-semibold tracking-tight text-slate-950">Complete Encryption</h3>
+          <p class="mt-3 max-w-lg text-sm leading-6 text-slate-500">Encrypt controllers, models, services, and routes. Your PHP files are compressed and encrypted using AES-256-CBC, and decrypted only at runtime via a custom autoloader.</p>
+        </div>
+      </div>
+      <div class="glass-panel relative overflow-hidden p-6">
+        <div class="absolute inset-0 bg-gradient-to-br from-amber-100/80 via-white to-orange-100/80"></div>
+        <div class="relative">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/70 bg-white/85 shadow-sm">
+            <i data-lucide="layers" class="h-5 w-5 text-slate-700"></i>
+          </div>
+          <h3 class="mt-5 text-xl font-semibold tracking-tight text-slate-950">Single Bundle</h3>
+          <p class="mt-3 text-sm leading-6 text-slate-500">Bundle all encrypted code into a single runtime file stored safely inside bootstrap cache. The original app/ directory is completely removed.</p>
+        </div>
+      </div>
+      <div class="glass-panel relative overflow-hidden p-6">
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-100/80 via-white to-cyan-50"></div>
+        <div class="relative">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/70 bg-white/85 shadow-sm">
+            <i data-lucide="blocks" class="h-5 w-5 text-slate-700"></i>
+          </div>
+          <h3 class="mt-5 text-xl font-semibold tracking-tight text-slate-950">Zero Extensions</h3>
+          <p class="mt-3 text-sm leading-6 text-slate-500">Works out of the box with standard PHP. No need to install and configure complex C extensions like ionCube on the target server.</p>
+        </div>
+      </div>
+      <div class="glass-panel relative overflow-hidden p-6 lg:col-span-2">
+        <div class="absolute inset-0 bg-gradient-to-br from-sky-100/80 via-white to-indigo-100/70"></div>
+        <div class="relative">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/70 bg-white/85 shadow-sm">
+            <i data-lucide="workflow" class="h-5 w-5 text-slate-700"></i>
+          </div>
+          <h3 class="mt-5 text-xl font-semibold tracking-tight text-slate-950">Automatic Asset Building</h3>
+          <p class="mt-3 max-w-lg text-sm leading-6 text-slate-500">Seamlessly detects and handles Composer and npm builds. Works automatically with API-only apps, Blade, Vue/React Starter Kits, and Vite projects.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="installation" class="mx-auto max-w-4xl px-4 py-20 sm:px-6 lg:px-8">
+    <div class="glass-panel p-8 sm:p-12">
+      <span class="section-badge mb-5">Setup</span>
+      <h2 class="text-3xl font-semibold tracking-tight text-slate-950 mb-8">Installation & Configuration</h2>
+      
+      <div class="space-y-10">
+        <div>
+          <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
+            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs text-white">1</span>
+            Install via Composer
+          </h3>
+          <div class="relative">
+            <button onclick="copyToClipboard('composer require dev-reymark/laravel-source-encryptor\nphp artisan vendor:publish --tag=source-encryptor-config', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition" title="Copy code">
+              <i data-lucide="copy" class="h-4 w-4"></i>
+            </button>
+            <pre class="bg-slate-900 text-slate-50 p-4 rounded-2xl text-sm font-mono overflow-x-auto code-scroll">composer require dev-reymark/laravel-source-encryptor
+php artisan vendor:publish --tag=source-encryptor-config</pre>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
+            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs text-white">2</span>
+            Configure Encryption Key
+          </h3>
+          <p class="text-sm text-slate-500 mb-3">Add this to your <code>.env</code> file. Generate a 32-byte secure key.</p>
+          <div class="relative mb-3">
+             <button onclick="copyToClipboard('SOURCE_ENCRYPTION_KEY=your_hex_key_here', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition" title="Copy code">
+               <i data-lucide="copy" class="h-4 w-4"></i>
+             </button>
+             <pre class="bg-slate-900 text-slate-50 p-4 rounded-2xl text-sm font-mono overflow-x-auto code-scroll">SOURCE_ENCRYPTION_KEY=your_hex_key_here</pre>
+          </div>
+          <p class="text-sm text-slate-500 mb-2">You can generate a secure key using:</p>
+          <div class="relative">
+             <button onclick="copyToClipboard('php -r \&quot;echo bin2hex(random_bytes(32));\&quot;', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition" title="Copy code">
+               <i data-lucide="copy" class="h-4 w-4"></i>
+             </button>
+             <pre class="bg-slate-900 text-slate-50 p-4 rounded-2xl text-sm font-mono overflow-x-auto code-scroll">php -r "echo bin2hex(random_bytes(32));"</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="usage" class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="glass-panel p-8 sm:p-12 relative overflow-hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_80%_28%,rgba(96,165,250,0.1),transparent_40%)]"></div>
+      <div class="relative">
+        <span class="section-badge mb-5">Usage</span>
+        <h2 class="text-3xl font-semibold tracking-tight text-slate-950 mb-8">Building Production Distribution</h2>
+        
+        <p class="text-sm text-slate-500 mb-4">Run the build command to generate your encrypted distribution ready for deployment.</p>
+        
+        <div class="relative mb-8">
+          <button onclick="copyToClipboard('php artisan source:build', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition" title="Copy code">
+            <i data-lucide="copy" class="h-4 w-4"></i>
+          </button>
+          <pre class="bg-slate-900 text-slate-50 p-4 rounded-2xl text-sm font-mono overflow-x-auto code-scroll">php artisan source:build</pre>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2 mb-10">
+          <div class="rounded-[24px] border border-slate-200/60 bg-white/60 p-5">
+            <h4 class="text-sm font-semibold text-slate-900 mb-2">Skip Frontend</h4>
+            <p class="text-xs text-slate-500 mb-3">Useful for API-only applications.</p>
+            <pre class="bg-slate-100 text-slate-800 p-3 rounded-xl text-xs font-mono overflow-x-auto">php artisan source:build --no-frontend</pre>
+          </div>
+          <div class="rounded-[24px] border border-slate-200/60 bg-white/60 p-5">
+            <h4 class="text-sm font-semibold text-slate-900 mb-2">Skip Composer</h4>
+            <p class="text-xs text-slate-500 mb-3">Useful in CI/CD pipelines or Docker builds.</p>
+            <pre class="bg-slate-100 text-slate-800 p-3 rounded-xl text-xs font-mono overflow-x-auto">php artisan source:build --skip-composer</pre>
+          </div>
+        </div>
+
+        <h3 class="text-xl font-semibold text-slate-950 mb-4">Distribution Structure</h3>
+        <p class="text-sm text-slate-500 mb-4">A clean distribution folder is created at <code>dist/</code>. The original <code>app/</code> directory is removed, and your source code is bundled.</p>
+        
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 font-mono text-sm text-slate-700">
+<pre>dist/
+ ├ artisan
+ ├ bootstrap/
+ │   └ cache/
+ │       └ <span class="text-emerald-600 font-bold">source.enc</span>
+ ├ routes/
+ ├ config/
+ ├ public/
+ ├ storage/
+ └ vendor/</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works" class="mx-auto max-w-4xl px-4 py-10 pb-24 sm:px-6 lg:px-8">
+    <div class="glass-panel p-8 sm:p-12 text-center">
+      <span class="section-badge mb-5">Architecture</span>
+      <h2 class="text-3xl font-semibold tracking-tight text-slate-950 mb-8">How It Works</h2>
+      
+      <div class="grid gap-6 md:grid-cols-4 text-left mt-10">
+        <div class="relative">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white mb-4 shadow-md">1</div>
+          <h4 class="text-sm font-semibold text-slate-900 mb-2">Compress & Encrypt</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">PHP files are compressed and encrypted using robust AES-256-CBC encryption.</p>
+          <div class="hidden md:block absolute top-5 left-12 w-[calc(100%-10px)] h-px bg-slate-200"></div>
+        </div>
+        <div class="relative">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white mb-4 shadow-md">2</div>
+          <h4 class="text-sm font-semibold text-slate-900 mb-2">Bundle Files</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Encrypted code is bundled into a single file at <code>bootstrap/cache/source.enc</code>.</p>
+          <div class="hidden md:block absolute top-5 left-12 w-[calc(100%-10px)] h-px bg-slate-200"></div>
+        </div>
+        <div class="relative">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white mb-4 shadow-md">3</div>
+          <h4 class="text-sm font-semibold text-slate-900 mb-2">Intercept Runtime</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">During execution, Laravel requests are passed through an EncryptedAutoloader.</p>
+          <div class="hidden md:block absolute top-5 left-12 w-[calc(100%-10px)] h-px bg-slate-200"></div>
+        </div>
+        <div class="relative">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500 text-white mb-4 shadow-md">
+            <i data-lucide="zap" class="h-5 w-5"></i>
+          </div>
+          <h4 class="text-sm font-semibold text-slate-900 mb-2">Safe Execution</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">SourceLoader decrypts and executes the PHP. Decrypted source <strong>never persists on disk</strong>.</p>
+        </div>
+      </div>
+      
+      <div class="mt-16 bg-rose-50/50 border border-rose-100 rounded-2xl p-6 text-left">
+        <h4 class="text-sm font-semibold text-rose-900 mb-3 flex items-center gap-2">
+          <i data-lucide="alert-triangle" class="h-4 w-4"></i> Security Notes
+        </h4>
+        <ul class="text-sm text-rose-700/80 space-y-2 list-disc list-inside">
+          <li>Keep your <code>SOURCE_ENCRYPTION_KEY</code> absolutely private.</li>
+          <li>Never commit <code>.env</code> to version control.</li>
+          <li>Only distribute the <code>dist/</code> directory to production servers.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer class="mx-auto max-w-5xl px-4 pb-10 sm:px-6 lg:px-8">
+    <div class="flex flex-col items-center justify-between gap-4 border-t border-slate-200/60 pt-8 text-center text-sm text-slate-500 sm:flex-row sm:text-left">
+      <p>MIT License &copy; 2026 <strong>Rey Mark Tapar</strong></p>
+      <div class="flex items-center gap-5">
+        <a href="https://reymarktapar.vercel.app" target="_blank" class="transition hover:text-slate-800">Website</a>
+        <a href="https://github.com/dev-reymark/laravel-source-encryptor" target="_blank" class="transition hover:text-slate-800">GitHub Repo</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactivity Script -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Copy to clipboard helper
+    function copyToClipboard(text, button) {
+      navigator.clipboard.writeText(text).then(() => {
+        const iconContainer = button.innerHTML;
+        button.innerHTML = '<i data-lucide="check" class="h-4 w-4 text-emerald-500"></i>';
+        lucide.createIcons();
+        setTimeout(() => {
+          button.innerHTML = iconContainer;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
