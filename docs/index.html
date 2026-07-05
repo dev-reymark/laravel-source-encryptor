@@ -153,8 +153,8 @@
            <div class="text-emerald-600 mb-2"># 1. Require the package</div>
            <div class="text-slate-800 mb-4">composer require dev-reymark/laravel-source-encryptor</div>
            
-           <div class="text-emerald-600 mb-2"># 2. Publish config</div>
-           <div class="text-slate-800 mb-4">php artisan vendor:publish --tag=source-encryptor-config</div>
+           <div class="text-emerald-600 mb-2"># 2. Initialize package</div>
+           <div class="text-slate-800 mb-4">php artisan source:install</div>
            
            <div class="text-emerald-600 mb-2"># 3. Build encrypted distribution</div>
            <div class="text-slate-800 flex items-center">
@@ -228,35 +228,27 @@
         <div>
           <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
             <span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs text-white">1</span>
-            Install via Composer
+            Require the Package
           </h3>
           <div class="relative">
-            <button onclick="copyToClipboard('composer require dev-reymark/laravel-source-encryptor\nphp artisan vendor:publish --tag=source-encryptor-config', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition" title="Copy code">
+            <button onclick="copyToClipboard('composer require dev-reymark/laravel-source-encryptor', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition" title="Copy code">
               <i data-lucide="copy" class="h-4 w-4"></i>
             </button>
-            <pre class="bg-slate-900 text-slate-50 p-4 rounded-2xl text-sm font-mono overflow-x-auto code-scroll">composer require dev-reymark/laravel-source-encryptor
-php artisan vendor:publish --tag=source-encryptor-config</pre>
+            <pre class="bg-slate-900 text-slate-50 p-4 rounded-2xl text-sm font-mono overflow-x-auto code-scroll">composer require dev-reymark/laravel-source-encryptor</pre>
           </div>
         </div>
 
         <div>
           <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
             <span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs text-white">2</span>
-            Configure Encryption Key
+            Initialize the Package
           </h3>
-          <p class="text-sm text-slate-500 mb-3">Add this to your <code>.env</code> file. Generate a 32-byte secure key.</p>
+          <p class="text-sm text-slate-500 mb-3">This command publishes the configuration file and securely generates and injects your <code>SOURCE_ENCRYPTION_KEY</code> into your <code>.env</code> file.</p>
           <div class="relative mb-3">
-             <button onclick="copyToClipboard('SOURCE_ENCRYPTION_KEY=your_hex_key_here', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition" title="Copy code">
+             <button onclick="copyToClipboard('php artisan source:install', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition" title="Copy code">
                <i data-lucide="copy" class="h-4 w-4"></i>
              </button>
-             <pre class="bg-slate-900 text-slate-50 p-4 rounded-2xl text-sm font-mono overflow-x-auto code-scroll">SOURCE_ENCRYPTION_KEY=your_hex_key_here</pre>
-          </div>
-          <p class="text-sm text-slate-500 mb-2">You can generate a secure key using:</p>
-          <div class="relative">
-             <button onclick="copyToClipboard('php -r \&quot;echo bin2hex(random_bytes(32));\&quot;', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition" title="Copy code">
-               <i data-lucide="copy" class="h-4 w-4"></i>
-             </button>
-             <pre class="bg-slate-900 text-slate-50 p-4 rounded-2xl text-sm font-mono overflow-x-auto code-scroll">php -r "echo bin2hex(random_bytes(32));"</pre>
+             <pre class="bg-slate-900 text-slate-50 p-4 rounded-2xl text-sm font-mono overflow-x-auto code-scroll">php artisan source:install</pre>
           </div>
         </div>
       </div>

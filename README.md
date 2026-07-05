@@ -20,18 +20,10 @@ Encrypt Laravel source code and safely distribute applications **without exposin
 ## Quick Installation
 ```bash
 composer require dev-reymark/laravel-source-encryptor
-php artisan vendor:publish --tag=source-encryptor-config
+php artisan source:install
 ```
 
-## Configuration
-Add to `.env`:
-```
-SOURCE_ENCRYPTION_KEY=your_hex_key_here
-```
-Generate a secure key: 
-```bash
-php -r "echo bin2hex(random_bytes(32));"
-```
+The `source:install` command will automatically publish the configuration file and securely generate and inject a `SOURCE_ENCRYPTION_KEY` into your `.env` file.
 
 ## Usage
 ### Build Production Distribution

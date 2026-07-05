@@ -10,14 +10,6 @@ class SourceLoader
 
     public function __construct()
     {
-        $key = $GLOBALS['__SOURCE_ENCRYPTION_KEY__'] ?? null;
-
-        if (!$key) {
-            throw new \RuntimeException('Encryption key not available.');
-        }
-
-        $this->key = hex2bin($key);
-
         $path = base_path('bootstrap/cache/source.enc');
 
         if (!file_exists($path)) {
@@ -25,6 +17,13 @@ class SourceLoader
             return;
         }
 
+        $key = $GLOBALS['__SOURCE_ENCRYPTION_KEY__'] ?? null;
+
+        if (!$key) {
+            throw new \RuntimeException('Encryption key not available.');
+        }
+
+        $this->key = hex2bin($key);
         $this->files = json_decode(file_get_contents($path), true) ?? [];
     }
 
