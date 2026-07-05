@@ -4,9 +4,9 @@ namespace DevReymark\SourceEncryptor\Services;
 
 class EncryptService
 {
-    protected string $key;
-    protected array $exclude;
-    protected string $output;
+    protected $key;
+    protected $exclude;
+    protected $output;
 
     public function __construct()
     {
@@ -33,7 +33,7 @@ class EncryptService
 
             $full = realpath(base_path($exclude));
 
-            if ($full && str_starts_with($path, $full)) {
+            if ($full && \Illuminate\Support\Str::startsWith($path, $full)) {
                 return true;
             }
         }
@@ -89,7 +89,7 @@ class EncryptService
                 continue;
             }
 
-            if (!str_ends_with($path, '.php')) {
+            if (!\Illuminate\Support\Str::endsWith($path, '.php')) {
                 continue;
             }
 
@@ -139,7 +139,7 @@ class EncryptService
 
                 $path = $file->getRealPath();
 
-                if (!str_ends_with($path, '.php')) {
+                if (!\Illuminate\Support\Str::endsWith($path, '.php')) {
                     continue;
                 }
 

@@ -39,7 +39,7 @@ class InstallCommand extends Command
 
         $env = File::get($envPath);
 
-        if (str_contains($env, 'SOURCE_ENCRYPTION_KEY=')) {
+        if (strpos($env, 'SOURCE_ENCRYPTION_KEY=') !== false) {
             $this->warn('SOURCE_ENCRYPTION_KEY is already set in your .env file.');
             return;
         }

@@ -14,7 +14,7 @@ class EncryptedAutoloader
 
         spl_autoload_register(function ($class) {
 
-            if (!str_starts_with($class, 'App\\')) {
+            if (strncmp($class, 'App\\', 4) !== 0) {
                 return;
             }
 

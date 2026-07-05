@@ -304,7 +304,7 @@ PHP;
 
             $content = file_get_contents($appPath);
 
-            if (str_contains($content, 'ConfigLoader::load')) {
+            if (strpos($content, 'ConfigLoader::load') !== false) {
                 return true; // already patched
             }
 

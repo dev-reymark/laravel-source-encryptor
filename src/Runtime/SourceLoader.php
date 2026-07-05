@@ -4,9 +4,9 @@ namespace DevReymark\SourceEncryptor\Runtime;
 
 class SourceLoader
 {
-    protected array $files = [];
-    protected string $key;
-    protected array $loaded = [];
+    protected $files = [];
+    protected $key;
+    protected $loaded = [];
 
     public function __construct(string $path = null)
     {
@@ -30,7 +30,7 @@ class SourceLoader
         
         if (!$registered) {
             spl_autoload_register(function ($class) {
-                if (!str_starts_with($class, 'App\\')) {
+                if (strncmp($class, 'App\\', 4) !== 0) {
                     return;
                 }
 
