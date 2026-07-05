@@ -391,7 +391,57 @@ PHP;
                     );
 
                     if (!$encrypt->isExcluded($originalPath)) {
-                        File::delete($file->getRealPath());
+                        $targetFile = $file->getRealPath();
+                        $deleted = false;
+                        for ($i = 0; $i < 10; $i++) {
+                            if (File::delete($targetFile)) {
+                                $deleted = true;
+                                break;
+                            }
+                            usleep(100000); // wait 100ms
+                        }
+                        if (!$deleted && file_exists($targetFile)) {
+                            $this->warn("Could not delete file: " . $targetFile);
+                        }
+                    }
+                }
+
+                // Give Windows a moment to finish pending file deletions
+                if (DIRECTORY_SEPARATOR === '\\') {
+                    sleep(1);
+                }
+
+                $directoriesFound = File::directories($path);
+
+                foreach ($directoriesFound as $d) {
+                    if (empty(File::allFiles($d))) {
+                        $dirDeleted = false;
+                        for ($i = 0; $i < 10; $i++) {
+                            File::deleteDirectory($d);
+                            clearstatcache(true, $d);
+                            if (!is_dir($d)) {
+                                $dirDeleted = true;
+                                break;
+                            }
+                            usleep(100000); // wait 100ms
+                        }
+                        if (!$dirDeleted && is_dir($d)) {
+                            $this->warn("Could not delete empty directory: " . $d);
+                        }
+                    }
+                }
+
+                // Delete the parent directory itself if it's completely empty
+                if (is_dir($path) && empty(File::allFiles($path)) && empty(File::directories($path))) {
+                    $dirDeleted = false;
+                    for ($i = 0; $i < 10; $i++) {
+                        File::deleteDirectory($path);
+                        clearstatcache(true, $path);
+                        if (!is_dir($path)) {
+                            $dirDeleted = true;
+                            break;
+                        }
+                        usleep(100000); // wait 100ms
                     }
                 }
             }
