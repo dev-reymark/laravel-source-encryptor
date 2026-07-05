@@ -63,10 +63,11 @@ Skip frontend build: Useful for API-only applications
 php artisan source:build --no-frontend
 ```
 
-Skip composer install: Useful in CI/CD pipelines or Docker builds.
+Skip composer install:
 ```bash
 php artisan source:build --skip-composer
 ```
+By default, the build command automatically runs `composer install --no-dev` inside the new `dist/` directory. Use the `--skip-composer` flag to skip this step if you are running the build in a CI/CD pipeline or Docker environment where you prefer to handle Composer installation manually to utilize caching and speed up build times.
 
 ## Configuration
 

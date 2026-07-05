@@ -279,7 +279,7 @@
           </div>
           <div class="rounded-[24px] border border-slate-200/60 bg-white/60 p-5">
             <h4 class="text-sm font-semibold text-slate-900 mb-2">Skip Composer</h4>
-            <p class="text-xs text-slate-500 mb-3">Useful in CI/CD pipelines or Docker builds.</p>
+            <p class="text-xs text-slate-500 mb-3">By default, the build runs <code>composer install --no-dev</code> inside the new <code>dist/</code> directory. Use this flag to skip it if you are in a CI/CD pipeline or Docker environment where you prefer to handle Composer installation manually to utilize caching.</p>
             <pre class="bg-slate-100 text-slate-800 p-3 rounded-xl text-xs font-mono overflow-x-auto">php artisan source:build --skip-composer</pre>
           </div>
         </div>
