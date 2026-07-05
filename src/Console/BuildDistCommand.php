@@ -238,6 +238,26 @@ class BuildDistCommand extends Command
 
         /*
         |--------------------------------------------------------------------------
+        | Clean Copied Cache Files
+        |--------------------------------------------------------------------------
+        */
+
+        $this->components->task('Cleaning copied cache files', function () use ($dist) {
+            $packages = $dist . '/bootstrap/cache/packages.php';
+            if (File::exists($packages)) {
+                File::delete($packages);
+            }
+
+            $services = $dist . '/bootstrap/cache/services.php';
+            if (File::exists($services)) {
+                File::delete($services);
+            }
+
+            return true;
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | Remove config directory
         |--------------------------------------------------------------------------
         */
