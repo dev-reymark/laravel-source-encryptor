@@ -22,6 +22,11 @@
       "DevReymark\\SourceEncryptor\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "DevReymark\\SourceEncryptor\\Tests\\": "tests/"
+    }
+  },
   "extra": {
     "laravel": {
       "providers": [
