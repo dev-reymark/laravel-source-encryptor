@@ -118,7 +118,7 @@
 
   <section class="relative overflow-hidden px-6 pb-16 pt-40 text-center z-10 mx-auto max-w-7xl">
     <div class="relative mx-auto max-w-3xl animate-fade-in">
-      <div class="section-badge mb-6">Laravel 11 & 12 Supported</div>
+      <div class="section-badge mb-6">Laravel 7.x to 13.x Supported</div>
       
       <h1 class="mt-6 max-w-3xl text-5xl font-semibold tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-7xl mx-auto leading-tight text-balance">
         Safely distribute
@@ -282,6 +282,22 @@
             <p class="text-xs text-slate-500 mb-3">Useful in CI/CD pipelines or Docker builds.</p>
             <pre class="bg-slate-100 text-slate-800 p-3 rounded-xl text-xs font-mono overflow-x-auto">php artisan source:build --skip-composer</pre>
           </div>
+        </div>
+
+        <h3 class="text-xl font-semibold text-slate-950 mb-4">Configuration & Excluding Directories</h3>
+        <p class="text-sm text-slate-500 mb-4">You can configure directory and file exclusions inside <code>config/source-encryptor.php</code>. Files and folders listed in the <code>exclude</code> array will be copied to your distribution normally without being encrypted.</p>
+        
+        <div class="relative mb-8">
+          <button onclick="copyToClipboard('    \'exclude\' => [\n        // Do not remove \'bootstrap\' or \'storage\'\n        \'bootstrap\',\n        \'storage\',\n        // Add custom directories to exclude:\n        \'app/Http/Controllers/Public\',\n    ],', this)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition" title="Copy code">
+            <i data-lucide="copy" class="h-4 w-4"></i>
+          </button>
+          <pre class="bg-slate-900 text-emerald-400 p-4 rounded-2xl text-sm font-mono overflow-x-auto code-scroll"><span class="text-rose-400">'exclude'</span> <span class="text-slate-50">=> [</span>
+    <span class="text-slate-500">// Do not remove 'bootstrap' or 'storage' — Laravel requires these.</span>
+    <span class="text-amber-300">'bootstrap'</span><span class="text-slate-50">,</span>
+    <span class="text-amber-300">'storage'</span><span class="text-slate-50">,</span>
+    <span class="text-slate-500">// Add custom directories or files to exclude:</span>
+    <span class="text-amber-300">'app/Http/Controllers/Public'</span><span class="text-slate-50">,</span>
+<span class="text-slate-50">],</span></pre>
         </div>
 
         <h3 class="text-xl font-semibold text-slate-950 mb-4">Distribution Structure</h3>

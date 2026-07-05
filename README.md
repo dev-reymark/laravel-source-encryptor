@@ -3,7 +3,7 @@
 [![Latest Version](https://img.shields.io/packagist/v/dev-reymark/laravel-source-encryptor.svg)](https://packagist.org/packages/dev-reymark/laravel-source-encryptor)
 [![Total Downloads](https://img.shields.io/packagist/dt/dev-reymark/laravel-source-encryptor.svg)](https://packagist.org/packages/dev-reymark/laravel-source-encryptor)
 [![License](https://img.shields.io/packagist/l/dev-reymark/laravel-source-encryptor.svg)](https://packagist.org/packages/dev-reymark/laravel-source-encryptor)
-[![Laravel](https://img.shields.io/badge/Laravel-11%20%7C%2012-red.svg)](https://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-7.x_--_13.x-red.svg)](https://laravel.com)
 
 Encrypt Laravel source code and safely distribute applications **without exposing PHP source files**. Converts your Laravel application's PHP files into encrypted code that is decrypted only at runtime, allowing you to distribute Laravel applications while protecting your intellectual property.
 
@@ -13,7 +13,7 @@ Encrypt Laravel source code and safely distribute applications **without exposin
 - Runtime decryption via custom autoloader
 - Automatic Composer and npm build handling
 - Cross-platform (Windows, Linux, macOS)
-- Laravel 11 & 12 support
+- Laravel 7.x through 13.x support
 - Optimized distribution builds
 - No external PHP extensions required
 
@@ -68,6 +68,25 @@ Skip composer install: Useful in CI/CD pipelines or Docker builds.
 php artisan source:build --skip-composer
 ```
 
+## Configuration
+
+You can customize the encryption behavior by modifying the `config/source-encryptor.php` file.
+
+### Excluding Directories from Encryption
+
+If you have specific directories (or files) that you want to exclude from the encryption process (for example, if they need to be readable by third-party packages or contain specific assets), you can add them to the `exclude` array:
+
+```php
+    'exclude' => [
+        // Do not remove 'bootstrap' or 'storage' — Laravel requires these to remain as physical, unencrypted files.
+        'bootstrap',
+        'storage',
+        // Add your own custom directories or files to exclude here:
+        'app/Http/Controllers/Public',
+    ],
+```
+Any files inside these excluded paths will be copied over to the `dist` directory exactly as they are, without being encrypted.
+
 ## Running the Encrypted Application
 ```bash
 cd dist
@@ -94,8 +113,8 @@ The build system automatically detects frontend environments:
 | Vite Projects     | Fully supported                      |
 
 ## Requirements
-- PHP **8.2+**
-- Laravel **11 or 12**
+- PHP **7.2.5+**
+- Laravel **7.x - 13.x**
 - OpenSSL extension enabled
 - Composer
 
