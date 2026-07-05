@@ -25,7 +25,7 @@ class EncryptService
         );
     }
 
-    protected function isExcluded(string $path): bool
+    public function isExcluded(string $path): bool
     {
         $path = realpath($path);
 
