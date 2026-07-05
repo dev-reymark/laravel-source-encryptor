@@ -7,15 +7,13 @@ use DevReymark\SourceEncryptor\Console\BuildDistCommand;
 
 class ServiceProviderTest extends TestCase
 {
-    /** @test */
-    public function it_registers_the_config()
+    public function test_it_registers_the_config()
     {
         // Assert the default config values are loaded
         $this->assertNotNull(config('source-encryptor'));
     }
 
-    /** @test */
-    public function it_registers_the_commands_when_running_in_console()
+    public function test_it_registers_the_commands_when_running_in_console()
     {
         // Orchestra Testbench runs in console mode by default.
         // We can assert the command is available via artisan.
