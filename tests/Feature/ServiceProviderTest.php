@@ -17,7 +17,8 @@ class ServiceProviderTest extends TestCase
     {
         // Orchestra Testbench runs in console mode by default.
         // We can assert the command is available via artisan.
-        $commands = $this->app['console']->all();
+        $kernel = $this->app->make(\Illuminate\Contracts\Console\Kernel::class);
+        $commands = $kernel->all();
 
         $this->assertArrayHasKey('source:build', $commands);
     }
