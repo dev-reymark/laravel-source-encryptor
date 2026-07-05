@@ -17,6 +17,28 @@ class BuildDistCommand extends Command
 
     public function handle()
     {
+        try {
+            return $this->build();
+        } finally {
+            $this->cleanupTempFiles();
+        }
+    }
+
+    protected function cleanupTempFiles()
+    {
+        $sourceEnc = base_path('bootstrap/cache/source.enc');
+        if (File::exists($sourceEnc)) {
+            File::delete($sourceEnc);
+        }
+
+        $configEnc = base_path('bootstrap/cache/config.enc');
+        if (File::exists($configEnc)) {
+            File::delete($configEnc);
+        }
+    }
+
+    protected function build()
+    {
         $start = microtime(true);
 
         $root = base_path();
