@@ -369,7 +369,7 @@ PHP;
         $this->components->task('Removing raw source', function () use ($dist) {
             $encrypt = new \DevReymark\SourceEncryptor\Services\EncryptService();
 
-            $dirs = ['app', 'routes'];
+            $dirs = ['app'];
 
             foreach ($dirs as $dir) {
                 $path = $dist . '/' . $dir;

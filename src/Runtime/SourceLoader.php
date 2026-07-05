@@ -26,17 +26,23 @@ class SourceLoader
         $this->key = hex2bin($key);
         $this->files = json_decode(file_get_contents($path), true) ?? [];
 
-        spl_autoload_register(function ($class) {
-            if (!str_starts_with($class, 'App\\')) {
-                return;
-            }
+        static $registered = false;
+        
+        if (!$registered) {
+            spl_autoload_register(function ($class) {
+                if (!str_starts_with($class, 'App\\')) {
+                    return;
+                }
 
-            $relative = 'app/' . str_replace('\\', '/', substr($class, 4)) . '.php';
+                $relative = 'app/' . str_replace('\\', '/', substr($class, 4)) . '.php';
 
-            if (isset($this->files[$relative])) {
-                $this->load($relative);
-            }
-        }, true, true);
+                if (isset($this->files[$relative])) {
+                    $this->load($relative);
+                }
+            }, true, true);
+            
+            $registered = true;
+        }
     }
 
     public function load(string $relative)
