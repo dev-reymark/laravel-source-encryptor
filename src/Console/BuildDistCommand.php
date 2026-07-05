@@ -223,8 +223,7 @@ class BuildDistCommand extends Command
             'database',
             'public',
             'resources',
-            'storage',
-            'vendor'
+            'storage'
         ];
 
         foreach ($dirs as $dir) {
