@@ -39,6 +39,11 @@ class SourceLoader
         }
 
         if (!isset($this->files[$relative])) {
+            $path = base_path($relative);
+            if (file_exists($path)) {
+                require $path;
+                return;
+            }
             throw new \RuntimeException("Encrypted file not found: " . $relative);
         }
 
