@@ -4,6 +4,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/dev-reymark/laravel-source-encryptor.svg)](https://packagist.org/packages/dev-reymark/laravel-source-encryptor)
 [![License](https://img.shields.io/packagist/l/dev-reymark/laravel-source-encryptor.svg)](https://packagist.org/packages/dev-reymark/laravel-source-encryptor)
 [![Laravel](https://img.shields.io/badge/Laravel-7.x_--_13.x-red.svg)](https://laravel.com)
+[![Tests](https://github.com/dev-reymark/laravel-source-encryptor/actions/workflows/run-tests.yml/badge.svg)](https://github.com/dev-reymark/laravel-source-encryptor/actions/workflows/run-tests.yml)
 
 Encrypt Laravel source code and safely distribute applications **without exposing PHP source files**. Converts your Laravel application's PHP files into encrypted code that is decrypted only at runtime, allowing you to distribute Laravel applications while protecting your intellectual property.
 
