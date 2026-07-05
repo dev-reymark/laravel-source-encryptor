@@ -24,9 +24,7 @@ return [
     */
 
     'exclude' => [
-        'app/Console',
-        'app/Exceptions',
-        'app/Providers', // keep this
+        // Do not remove 'bootstrap' or 'storage' — Laravel requires these to remain as physical, unencrypted files.
         'bootstrap',
         'storage',
     ],
