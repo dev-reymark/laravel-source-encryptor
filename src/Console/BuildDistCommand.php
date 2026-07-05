@@ -361,28 +361,38 @@ PHP;
         |--------------------------------------------------------------------------
         */
 
-        $this->info('Removing raw source...');
+        $this->components->task('Removing raw source', function () use ($dist) {
+            $encrypt = new \DevReymark\SourceEncryptor\Services\EncryptService();
 
-        $keep = [
-            'Providers',
-            'Console',
-            'Exceptions',
-        ];
+            $dirs = ['app', 'routes'];
 
-        $appPath = $dist . '/app';
-
-        if (is_dir($appPath)) {
-            foreach (scandir($appPath) as $dir) {
-
-                if ($dir === '.' || $dir === '..') {
+            foreach ($dirs as $dir) {
+                $path = $dist . '/' . $dir;
+                
+                if (!File::exists($path)) {
                     continue;
                 }
 
-                if (!in_array($dir, $keep)) {
-                    File::deleteDirectory($appPath . '/' . $dir);
+                foreach (File::allFiles($path) as $file) {
+                    if ($file->getExtension() !== 'php') {
+                        continue;
+                    }
+
+                    // Map the dist path back to the original project path to check if it was excluded
+                    $originalPath = str_replace(
+                        str_replace('\\', '/', realpath($dist)),
+                        str_replace('\\', '/', realpath(base_path())),
+                        str_replace('\\', '/', $file->getRealPath())
+                    );
+
+                    if (!$encrypt->isExcluded($originalPath)) {
+                        File::delete($file->getRealPath());
+                    }
                 }
             }
-        }
+
+            return true;
+        });
 
         /*
         |--------------------------------------------------------------------------
