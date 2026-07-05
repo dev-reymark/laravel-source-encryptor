@@ -93,36 +93,6 @@ class BuildDistCommand extends Command
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Install Composer Dependencies
-        |--------------------------------------------------------------------------
-        */
-
-        if (!$this->option('skip-composer')) {
-
-            $this->components->task('Installing production Composer dependencies', function () use ($root) {
-
-                $process = new Process([
-                    'composer',
-                    'install',
-                    '--no-dev',
-                    '--optimize-autoloader',
-                    '--no-scripts',
-                    '--no-interaction',
-                    '--prefer-dist'
-                ]);
-
-                $process->setWorkingDirectory($root);
-                $process->setTimeout(null);
-
-                $process->run(function ($type, $buffer) {
-                    $this->output->write($buffer);
-                });
-
-                return $process->isSuccessful();
-            });
-        }
 
         /*
         |--------------------------------------------------------------------------
@@ -243,6 +213,41 @@ class BuildDistCommand extends Command
             if (File::exists($source)) {
                 File::copyDirectory($source, $target);
             }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Install Composer Dependencies
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$this->option('skip-composer')) {
+
+            $this->components->task('Installing production Composer dependencies', function () use ($dist) {
+
+                $process = new Process([
+                    'composer',
+                    'install',
+                    '--no-dev',
+                    '--optimize-autoloader',
+                    '--no-scripts',
+                    '--no-interaction',
+                    '--prefer-dist'
+                ]);
+
+                $process->setWorkingDirectory($dist);
+                $process->setTimeout(null);
+
+                $process->run(function ($type, $buffer) {
+                    $this->output->write($buffer);
+                });
+
+                if (!$process->isSuccessful()) {
+                    throw new \RuntimeException("Composer install failed:\n" . $process->getErrorOutput() . "\n" . $process->getOutput());
+                }
+
+                return true;
+            });
         }
 
         /*
