@@ -217,41 +217,6 @@ class BuildDistCommand extends Command
 
         /*
         |--------------------------------------------------------------------------
-        | Install Composer Dependencies
-        |--------------------------------------------------------------------------
-        */
-
-        if (!$this->option('skip-composer')) {
-
-            $this->components->task('Installing production Composer dependencies', function () use ($dist) {
-
-                $process = new Process([
-                    'composer',
-                    'install',
-                    '--no-dev',
-                    '--optimize-autoloader',
-                    '--no-scripts',
-                    '--no-interaction',
-                    '--prefer-dist'
-                ]);
-
-                $process->setWorkingDirectory($dist);
-                $process->setTimeout(null);
-
-                $process->run(function ($type, $buffer) {
-                    $this->output->write($buffer);
-                });
-
-                if (!$process->isSuccessful()) {
-                    throw new \RuntimeException("Composer install failed:\n" . $process->getErrorOutput() . "\n" . $process->getOutput());
-                }
-
-                return true;
-            });
-        }
-
-        /*
-        |--------------------------------------------------------------------------
         | Remove config directory
         |--------------------------------------------------------------------------
         */
@@ -421,30 +386,37 @@ PHP;
 
         /*
         |--------------------------------------------------------------------------
-        | Optimize Composer
+        | Install Composer Dependencies
         |--------------------------------------------------------------------------
         */
 
-        $this->components->task('Optimizing Composer autoload', function () use ($dist) {
+        if (!$this->option('skip-composer')) {
+            $this->components->task('Installing production Composer dependencies', function () use ($dist) {
 
-            $process = new Process([
-                'composer',
-                'dump-autoload',
-                '--optimize',
-                '--no-dev',
-                '--no-scripts'
-            ]);
+                $process = new Process([
+                    'composer',
+                    'install',
+                    '--no-dev',
+                    '--optimize-autoloader',
+                    '--no-scripts',
+                    '--no-interaction',
+                    '--prefer-dist'
+                ]);
 
-            $process->setWorkingDirectory($dist);
-            $process->setTimeout(null);
-            $process->run();
+                $process->setWorkingDirectory($dist);
+                $process->setTimeout(null);
 
-            if (!$process->isSuccessful()) {
-                throw new \RuntimeException("Composer optimize failed:\n" . $process->getErrorOutput() . "\n" . $process->getOutput());
-            }
+                $process->run(function ($type, $buffer) {
+                    $this->output->write($buffer);
+                });
 
-            return true;
-        });
+                if (!$process->isSuccessful()) {
+                    throw new \RuntimeException("Composer install failed:\n" . $process->getErrorOutput() . "\n" . $process->getOutput());
+                }
+
+                return true;
+            });
+        }
 
         /*
         |--------------------------------------------------------------------------
