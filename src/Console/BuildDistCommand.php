@@ -143,21 +143,6 @@ class BuildDistCommand extends Command
 
         /*
         |--------------------------------------------------------------------------
-        | Encrypt Source
-        |--------------------------------------------------------------------------
-        */
-
-        $this->components->task('Encrypting source files', function () {
-
-            $encrypt = new EncryptService();
-            $encrypt->cleanOutput();
-            $encrypt->encryptProject();
-
-            return true;
-        });
-
-        /*
-        |--------------------------------------------------------------------------
         | Cache Config
         |--------------------------------------------------------------------------
         */
@@ -170,7 +155,11 @@ class BuildDistCommand extends Command
             $process->setTimeout(null);
             $process->run();
 
-            return $process->isSuccessful();
+            if (!$process->isSuccessful()) {
+                throw new \RuntimeException("Caching config failed:\n" . $process->getErrorOutput() . "\n" . $process->getOutput());
+            }
+
+            return true;
         });
 
         /*
@@ -209,6 +198,21 @@ class BuildDistCommand extends Command
             );
 
             unlink($config);
+
+            return true;
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Encrypt Source
+        |--------------------------------------------------------------------------
+        */
+
+        $this->components->task('Encrypting source files', function () {
+
+            $encrypt = new EncryptService();
+            $encrypt->cleanOutput();
+            $encrypt->encryptProject();
 
             return true;
         });
@@ -430,7 +434,11 @@ PHP;
             $process->setTimeout(null);
             $process->run();
 
-            return $process->isSuccessful();
+            if (!$process->isSuccessful()) {
+                throw new \RuntimeException("Composer optimize failed:\n" . $process->getErrorOutput() . "\n" . $process->getOutput());
+            }
+
+            return true;
         });
 
         /*
@@ -447,7 +455,11 @@ PHP;
             $process->setTimeout(null);
             $process->run();
 
-            return $process->isSuccessful();
+            if (!$process->isSuccessful()) {
+                throw new \RuntimeException("Package discovery failed:\n" . $process->getErrorOutput() . "\n" . $process->getOutput());
+            }
+
+            return true;
         });
 
         /*

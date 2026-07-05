@@ -64,21 +64,10 @@ class EncryptService
 
     public function cleanOutput(): void
     {
-        if (!is_dir($this->output)) {
-            return;
-        }
+        $target = $this->output . '/source.enc';
 
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($this->output, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
-        );
-
-        foreach ($iterator as $file) {
-            if ($file->isDir()) {
-                rmdir($file->getRealPath());
-            } else {
-                unlink($file->getRealPath());
-            }
+        if (file_exists($target)) {
+            unlink($target);
         }
     }
 
