@@ -58,10 +58,11 @@ dist/
 The original `app/` directory is removed. All encrypted source code is stored inside `bootstrap/cache/source.enc`.
 
 ## Build Options
-Skip frontend build: Useful for API-only applications
+Skip frontend build:
 ```bash
 php artisan source:build --no-frontend
 ```
+By default, the build command will automatically attempt to run `npm install` and `npm run build` if it detects frontend assets. Use the `--no-frontend` flag to skip this process entirely. This is highly recommended for API-only applications or if you compile your frontend assets separately.
 
 Skip composer install:
 ```bash
