@@ -42,15 +42,19 @@ The command will:
 8. Create a clean **distribution folder** at `dist/`
 
 ## Distribution Structure
-```
+```text
 dist/
  ├ artisan
  ├ bootstrap/
  │   └ cache/
+ │       ├ config.enc
  │       └ source.enc
- ├ routes/
- ├ config/
+ ├ composer.json
+ ├ composer.lock
+ ├ database/
  ├ public/
+ ├ resources/
+ ├ routes/
  ├ storage/
  └ vendor/
 ```
