@@ -274,11 +274,16 @@ class BuildDistCommand extends Command
 
         $patch = <<<PHP
 use DevReymark\\SourceEncryptor\\Runtime\\ConfigLoader;
+use DevReymark\\SourceEncryptor\\Runtime\\SourceLoader;
 
 \$GLOBALS['__SOURCE_ENCRYPTION_KEY__'] = '{$buildKey}';
 
 if (file_exists(__DIR__.'/cache/config.enc')) {
     ConfigLoader::load(__DIR__.'/cache/config.enc', '{$buildKey}');
+}
+
+if (file_exists(__DIR__.'/cache/source.enc')) {
+    new SourceLoader(__DIR__.'/cache/source.enc');
 }
 
 PHP;

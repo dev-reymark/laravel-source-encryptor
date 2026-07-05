@@ -8,9 +8,9 @@ class SourceLoader
     protected string $key;
     protected array $loaded = [];
 
-    public function __construct()
+    public function __construct(string $path = null)
     {
-        $path = base_path('bootstrap/cache/source.enc');
+        $path = $path ?? (function_exists('base_path') ? base_path('bootstrap/cache/source.enc') : __DIR__ . '/../../../bootstrap/cache/source.enc');
 
         if (!file_exists($path)) {
             $this->files = [];
@@ -25,6 +25,18 @@ class SourceLoader
 
         $this->key = hex2bin($key);
         $this->files = json_decode(file_get_contents($path), true) ?? [];
+
+        spl_autoload_register(function ($class) {
+            if (!str_starts_with($class, 'App\\')) {
+                return;
+            }
+
+            $relative = 'app/' . str_replace('\\', '/', substr($class, 4)) . '.php';
+
+            if (isset($this->files[$relative])) {
+                $this->load($relative);
+            }
+        }, true, true);
     }
 
     public function load(string $relative)
